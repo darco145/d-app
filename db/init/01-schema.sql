@@ -4,3 +4,10 @@ CREATE TABLE IF NOT EXISTS todos (
     done BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS activity_log (
+    id SERIAL PRIMARY KEY,
+    todo_id INT REFERENCES todos(id) ON DELETE CASCADE,
+    processed_by TEXT NOT NULL,
+    processed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

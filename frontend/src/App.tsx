@@ -3,24 +3,49 @@ import { useState, useEffect } from 'react';
 export default function App() {
   const [todos, setTodos] = useState([]);
   const [newTitle, setNewTitle] = useState('');
+  const [activities, setActivities] = useState([]);
 
   const fetchTodos = async () => {
     try {
       const res = await fetch('/api/todos');
       const data = await res.json();
       if (Array.isArray(data)) {
-            setTodos(data);
-          } else {
-            console.error('Backend nije vratio niz:', data);
-            setTodos([]); // Sprečava pucanje aplikacije
-          }
+        setTodos(data);
+      } else {
+        console.error('Backend nije vratio niz:', data);
+        setTodos([]);
+      }
     } catch (err) {
       console.error('Greška pri dohvatanju todo-a:', err);
     }
   };
 
+  const fetchActivities = async () => {
+    try {
+      const res = await fetch('/api/activity');
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setActivities(data);
+      } else {
+        console.error('Backend nije vratio niz aktivnosti:', data);
+        setActivities([]);
+      }
+    } catch (err) {
+      console.error('Greška pri dohvatanju aktivnosti:', err);
+    }
+  };
+
   useEffect(() => {
     fetchTodos();
+    fetchActivities();
+
+    // Poling: poziva /api/activity na svakih 2000 ms (2 sekunde)
+    const interval = setInterval(() => {
+      fetchActivities();
+    }, 2000);
+
+    // Čišćenje intervala pri unmount-u komponente
+    return () => clearInterval(interval);
   }, []);
 
   const handleAdd = async (e) => {
@@ -50,6 +75,7 @@ export default function App() {
         body: JSON.stringify({ done: !done }),
       });
       fetchTodos();
+      fetchActivities(); // Osvežavamo odmah i aktivnosti
     } catch (err) {
       console.error('Greška pri izmeni statusa:', err);
     }
@@ -101,6 +127,27 @@ export default function App() {
           </li>
         ))}
       </ul>
+
+      {/* Sekcija Aktivnost */}
+      <hr style={{ margin: '30px 0' }} />
+      <section className="activity-section">
+        <h2>Aktivnost</h2>
+        {activities.length === 0 ? (
+          <p>Nema zabeleženih aktivnosti.</p>
+        ) : (
+          <ul className="activity-list">
+            {activities.map((item) => (
+              <li key={item.id} className="activity-item">
+                <span>
+                  Todo ID: <strong>#{item.todo_id}</strong> obrađen od strane{' '}
+                  <strong>{item.processed_by}</strong> u{' '}
+                  {new Date(item.processed_at).toLocaleString()}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }

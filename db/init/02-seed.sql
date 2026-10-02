@@ -1,5 +1,5 @@
 INSERT INTO todos (title, done) VALUES
-('Kupi hleb i mleko', false),
+('NE Kupi hleb i mleko', false),
 ('Nauči osnove Dockera', false),
 ('Instaliraj Linux zavisnosti', true),
 ('Napiši Express backend', false),
