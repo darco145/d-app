@@ -15,7 +15,7 @@ jobs:
       - name: Print OS Info
         run: |
           echo "Operating System Runner:"
-          uname - a
+          uname -a
           lsb_release =a
 
       - name: Print Node.js Version
