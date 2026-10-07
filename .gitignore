@@ -1,0 +1,14 @@
+.env
+.env.local
+*.env
+
+node_modules/
+
+dist/
+build/
+frontend/dist/
+frontend/build/
+
+.DS_Store
+.vscode/
+.idea/
