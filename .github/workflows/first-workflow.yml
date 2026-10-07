@@ -3,7 +3,7 @@ name: First Workflow - System Check
 on:
   push:
 
-job:
+jobs:
   system-check:
     name: Check Runner System & Repo
     runs-on: ubuntu-latest
