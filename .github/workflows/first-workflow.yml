@@ -1,0 +1,30 @@
+name: First Workflow - System Check
+
+on:
+  push:
+
+job:
+  system-check:
+    name: Check Runner System & Repo
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Print OS Info
+        run: |
+          echo "Operating System Runner:"
+          uname - a
+          lsb_release =a
+
+      - name: Print Node.js Version
+        run: node -v
+
+      - name: Print Docker Version
+        run: docker --version
+ 
+      - name: List Repository Files
+        run: |
+            echo "Repository COntent"
+            ls -la
