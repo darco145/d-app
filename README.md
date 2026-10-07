@@ -1,5 +1,7 @@
 # Todo App
 
+22222 conc
+
 Jednostavna full-stack Todo aplikacija pravljena za potrebe savladavanja osnova Dockera.
 
 ## Struktura Projekta
