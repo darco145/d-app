@@ -1,6 +1,7 @@
 # Todo App
 
-22222 conc
+![CI Pipeline Status](https://github.com/darco145/TVOJ_REPO/actions/workflows/ci.yml/badge.svg)
+![Publish Status](https://github.com/darco145/TVOJ_REPO/actions/workflows/docker-publish.yml/badge.svg)
 
 Jednostavna full-stack Todo aplikacija pravljena za potrebe savladavanja osnova Dockera.
 
