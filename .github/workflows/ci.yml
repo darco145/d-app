@@ -61,9 +61,9 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test_db
+          POSTGRES_USER: ${{ vars.DB_USER || 'postgres' }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD || 'postgres' }}
+          POSTGRES_DB: ${{ vars.DB_NAME || 'test_db' }}
         ports:
           - 5432:5432
         options: >-
@@ -88,11 +88,11 @@ jobs:
 
       - name: Run Integration Tests
         env:
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_USER: postgres
-          DB_PASSWORD: postgres
-          DB_NAME: test_db
+          DB_HOST: ${{ vars.DB_HOST || 'localhost' }}
+          DB_PORT: ${{ vars.DB_PORT || '5432' }}
+          DB_USER: ${{ vars.DB_USER || 'postgres' }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD || 'postgres' }}
+          DB_NAME: ${{ vars.DB_NAME || 'test_db' }}
         run: npm run test:integration
 
   frontend-lint:
