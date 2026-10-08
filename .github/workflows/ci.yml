@@ -235,3 +235,69 @@ jobs:
           fi
 
           echo "✅ Backend health check uspešan (/api/health vratio 200 OK)."
+  
+  verify-and-report:
+    name: Verify & Generate Markdown Report
+    runs-on: ubuntu-latest
+    needs: [calculate-version, docker-matrix-build]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          load: true
+          tags: frontend:verify
+          cache-from: type=gha,scope=docker-frontend
+
+      - name: Build Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          load: true
+          tags: backend:verify
+          cache-from: type=gha,scope=docker-backend
+
+      - name: Check Health and Sizes
+        id: inspect
+        run: |
+          FRONTEND_BYTES=$(docker image inspect frontend:verify --format='{{.Size}}')
+          FRONTEND_MB=$((FRONTEND_BYTES / 1024 / 1024))
+
+          BACKEND_BYTES=$(docker image inspect backend:verify --format='{{.Size}}')
+          BACKEND_MB=$((BACKEND_BYTES / 1024 / 1024))
+
+          if [ $FRONTEND_MB -gt 60 ]; then
+            echo "❌ Frontend slika prevelika!"
+            exit 1
+          fi
+
+          docker run -d --name test-backend -p 3000:3000 backend:verify
+          sleep 3
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health)
+
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "❌ Backend health failed!"
+            exit 1
+          fi
+
+          echo "frontend_mb=${FRONTEND_MB}" >> $GITHUB_OUTPUT
+          echo "backend_mb=${BACKEND_MB}" >> $GITHUB_OUTPUT
+
+      - name: Generate Markdown Summary Report
+        run: |
+          echo "## 🚀 CI Pipeline Build Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Verzija generisana iz prvog job-a:** \`${{ needs.calculate-version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Servis | Veličina slike | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Frontend** | ${{ steps.inspect.outputs.frontend_mb }} MB \vert{} ✅ Prošao (< 60MB) \vert{}" >> $GITHUB_STEP_SUMMARY
+          echo "| **Backend** | ${{ steps.inspect.outputs.backend_mb }} MB \vert{} ✅ Health /api/health 200 OK \vert{}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📌 *Izveštaj automatski generisan u sklopu CI provere.*" >> $GITHUB_STEP_SUMMARY
