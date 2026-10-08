@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: production_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    image: ghcr.io/darco145/backend:latest
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: production_db
+    depends_on:
+      - postgres
+
+  frontend:
+    image: ghcr.io/darco145/frontend:latest
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+  worker:
+    image: ghcr.io/darco145/worker:latest
+    restart: always
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
