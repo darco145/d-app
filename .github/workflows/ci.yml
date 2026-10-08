@@ -11,6 +11,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+
+  calculate-version:
+    name: Calculate Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compute Short SHA Version
+        id: get_version
+        run: |
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          echo "version=1.0.${SHORT_SHA}" >> $GITHUB_OUTPUT
+
   lint-and-test-backend:
     name: Backend (Lint & Health Test)
     runs-on: ubuntu-latest
